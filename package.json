@@ -1,0 +1,58 @@
+{
+  "name": "egg-tracking-server",
+  "version": "1.0.0",
+  "description": "前端监控平台后端服务",
+  "private": true,
+  "egg": {
+    "typescript": true
+  },
+  "scripts": {
+    "start": "eggctl start --daemon --title=egg-tracking-server",
+    "stop": "eggctl stop --title=egg-tracking-server",
+    "restart": "pnpm stop && pnpm start",
+    "dev": "egg-bin dev --ts=true --port=7002",
+    "dev:prod": "cross-env DATE_BASE_ENV=production npm run dev",
+    "clean:js": "find . -name \"*.js\" -type f -not -path \"./node_modules/*\" -not -path \"./test/*\" -not -path \"./coverage/*\" -delete",
+    "clean:jsmap": "find . -name \"*.js.map\" -type f -not -path \"./node_modules/*\" -delete",
+    "clean": "npm run clean:js && npm run clean:jsmap",
+    "tsc": "tsc --skipLibCheck",
+    "build": "npm run clean && npm run tsc",
+    "tsc:watch": "tsc --skipLibCheck --watch",
+    "lint": "eslint . --ext .ts --cache"
+  },
+  "dependencies": {
+    "@eggjs/scripts": "^4.0.0",
+    "@eggjs/tegg": "^3.5.2",
+    "@eggjs/tegg-aop-plugin": "^3.5.2",
+    "@eggjs/tegg-config": "^3.5.2",
+    "@eggjs/tegg-controller-plugin": "^3.5.2",
+    "@eggjs/tegg-eventbus-plugin": "^3.5.2",
+    "@eggjs/tegg-plugin": "^3.5.2",
+    "@eggjs/tegg-schedule-plugin": "^3.5.2",
+    "@eggjs/tracer": "^3.0.0",
+    "dotenv": "^17.2.3",
+    "egg": "^4.0.0",
+    "egg-cors": "^3.0.1",
+    "egg-mongoose": "^4.0.1",
+    "egg-validate": "^2.0.2",
+    "mongoose": "^8.16.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@eggjs/bin": "7",
+    "@eggjs/mock": "6",
+    "@eggjs/tsconfig": "1",
+    "@types/mongoose": "^5.11.97",
+    "@types/node": "22",
+    "@types/uuid": "^10.0.0",
+    "cross-env": "^10.0.0",
+    "eslint": "8",
+    "eslint-config-egg": "14",
+    "typescript": "5"
+  },
+  "engines": {
+    "node": ">=20.18.1"
+  },
+  "author": "",
+  "license": "MIT"
+}

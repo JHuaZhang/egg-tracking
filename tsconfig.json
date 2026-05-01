@@ -1,0 +1,43 @@
+{
+  "extends": "@eggjs/tsconfig",
+  "compilerOptions": {
+    "outDir": ".",
+    "rootDir": ".",
+    "target": "ES2022",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmitOnError": false,
+    "incremental": false,
+    "sourceMap": false,
+    "declaration": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["*"],
+      "@/app/*": ["app/*"],
+      "@/config/*": ["config/*"],
+      "@/typings/*": ["typings/*"],
+      "@/utils/*": ["app/utils/*"],
+      "@/constant/*": ["app/constant/*"]
+    }
+  },
+  "include": [
+    "app/**/*.ts",
+    "config/**/*.ts",
+    "typings/**/*.ts",
+    "app.ts",
+    "agent.ts",
+    "index.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "test",
+    "coverage",
+    "logs",
+    "run",
+    "public",
+    "app/public",
+    "app/view"
+  ]
+}
