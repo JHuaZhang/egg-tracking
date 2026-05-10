@@ -16,7 +16,7 @@ export default function authMiddleware() {
       return;
     }
 
-    const authorization = ctx.get('Authorization');
+    const authorization = ctx.get('Authorization') as string;
     if (!authorization) {
       ctx.fail(401, '未登录或登录已过期');
       return;
