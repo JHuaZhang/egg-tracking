@@ -22,4 +22,4 @@ RUN pnpm prune --prod
 
 EXPOSE 7002
 
-CMD ["npm", "start"]
+CMD ["npx", "egg-scripts", "start", "--workers=1", "--title=egg-tracking-server"]
