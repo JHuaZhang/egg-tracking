@@ -342,7 +342,124 @@ pnpm run start      # 生产环境启动
 
 ---
 
-### 四、告警规则
+### 四、用户认证与管理
+
+#### 环境变量配置
+
+| 变量 | 必填 | 说明 |
+|------|------|------|
+| `SETUP_SECRET` | ✅ | 创建超级管理员的安全密钥，仅部署者知道 |
+
+#### 接口列表
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
+| `POST` | `/user/setup-admin` | 创建超级管理员（一次性） | ❌ 无需 |
+| `POST` | `/user/login` | 用户登录 | ❌ 无需 |
+| `GET` | `/user/info` | 获取当前用户信息 | ✅ 需要 |
+| `POST` | `/user/change-password` | 修改密码 | ✅ 需要 |
+| `POST` | `/user/create` | 创建用户（管理员） | ✅ 管理员 |
+| `GET` | `/user/list` | 用户列表（管理员） | ✅ 管理员 |
+| `DELETE` | `/user/:id` | 删除用户（管理员） | ✅ 管理员 |
+| `PUT` | `/user/:id/apps` | 分配应用权限（管理员） | ✅ 管理员 |
+
+---
+
+#### POST /user/setup-admin — 创建超级管理员
+
+> ⚠️ **一次性接口**：超管已存在时返回 404。需提供正确的 `SETUP_SECRET` 环境变量密钥。
+
+**请求 Body**：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `email` | string | ✅ | 管理员邮箱 |
+| `password` | string | ✅ | 管理员密码（≥6位） |
+| `secret` | string | ✅ | 与环境变量 `SETUP_SECRET` 一致的密钥 |
+
+**调用示例**：
+
+```bash
+curl -X POST https://your-domain/api/tracking/user/setup-admin \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@example.com", "password": "your-password", "secret": "your-setup-secret"}'
+```
+
+**安全机制**：
+- `secret` 不匹配 → 返回 `404 Not Found`
+- 超管已存在 → 返回 `404 Not Found`
+- 参数缺失 → 返回 `404 Not Found`
+- 所有失败情况均返回相同的 404 响应，无法区分原因
+
+---
+
+#### POST /user/login — 用户登录
+
+**请求 Body**：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `email` | string | ✅ | 邮箱 |
+| `password` | string | ✅ | 密码 |
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "userInfo": {
+      "id": "663f...",
+      "email": "admin@example.com",
+      "role": "admin",
+      "mustChangePassword": false,
+      "allowedApps": []
+    }
+  }
+}
+```
+
+---
+
+#### POST /user/change-password — 修改密码
+
+**请求 Body**：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `oldPassword` | string | ✅ | 原密码 |
+| `newPassword` | string | ✅ | 新密码（≥6位） |
+
+> 被邀请的新用户首次登录时 `mustChangePassword=true`，前端会强制跳转到修改密码页面。
+
+---
+
+#### POST /user/create — 管理员创建用户
+
+**请求 Body**：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `email` | string | ✅ | 新用户邮箱 |
+
+> 新用户默认密码为 `123456`，首次登录强制修改密码。
+
+---
+
+#### PUT /user/:id/apps — 分配应用权限
+
+**请求 Body**：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `allowedApps` | string[] | ✅ | 允许访问的应用 ID 数组 |
+
+> 管理员拥有所有应用的访问权限，普通用户只能查看 `allowedApps` 中的应用数据。
+
+---
+
+### 五、告警规则
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
@@ -395,6 +512,7 @@ pnpm run start      # 生产环境启动
 | Collection | 说明 | 关键字段 |
 |------------|------|----------|
 | `App` | 应用信息 | `name, appKey, description` |
+| `User` | 用户信息 | `email, passwordHash, role, mustChangePassword, allowedApps` |
 | `PerformanceMetric` | 页面性能数据 | `appKey, pageUrl, dns, tcp, ttfb, fcp, lcp, loadTime` |
 | `JsError` | JS 异常记录 | `appKey, errorMessage, errorType, errorStack, pageUrl, userId` |
 | `ApiRequest` | API 请求记录 | `appKey, url, method, statusCode, duration, success` |
@@ -415,14 +533,17 @@ egg-tracking/
 │   │   ├── app.ts         # 应用管理（5 个接口）
 │   │   ├── report.ts      # 数据上报（1 个接口）
 │   │   ├── metrics.ts     # 指标查询（9 个接口）
-│   │   └── alert.ts       # 告警规则（4 个接口）
+│   │   ├── alert.ts       # 告警规则（4 个接口）
+│   │   └── user.ts        # 用户认证与管理（8 个接口）
 │   ├── service/           # 业务逻辑
 │   │   ├── app.ts
 │   │   ├── report.ts
 │   │   ├── metrics.ts
-│   │   └── alert.ts
-│   ├── model/             # 数据模型（7 个 Collection）
+│   │   ├── alert.ts
+│   │   └── user.ts
+│   ├── model/             # 数据模型（8 个 Collection）
 │   │   ├── app.ts
+│   │   ├── user.ts
 │   │   ├── performanceMetric.ts
 │   │   ├── jsError.ts
 │   │   ├── apiRequest.ts
@@ -431,8 +552,9 @@ egg-tracking/
 │   │   └── alertRule.ts
 │   ├── middleware/         # 中间件
 │   │   ├── errorHandler.ts
-│   │   └── requestLogger.ts
-│   └── router.ts          # 路由定义（19 个接口）
+│   │   ├── requestLogger.ts
+│   │   └── auth.ts        # JWT 认证中间件
+│   └── router.ts          # 路由定义（27 个接口）
 ├── config/                # 配置文件
 ├── typings/               # TypeScript 类型
 ├── app.ts                 # 应用入口

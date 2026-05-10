@@ -1,12 +1,27 @@
 import { Controller } from 'egg';
 
 export default class MetricsController extends Controller {
+  /** 检查当前用户是否有权限访问指定 appKey 的应用 */
+  private async checkAppAccess(appKey: string): Promise<boolean> {
+    const { ctx } = this;
+    const userId = (ctx as any).userId;
+    const role = (ctx as any).role;
+    if (role === 'admin') return true;
+    const hasAccess = await (ctx.service as any).user.checkAppPermission(userId, appKey);
+    return hasAccess;
+  }
+
   async overview() {
     const { ctx } = this;
     const { appKey, date } = ctx.query;
 
     if (!appKey) {
       ctx.fail(400, 'appKey is required');
+      return;
+    }
+
+    if (!await this.checkAppAccess(appKey)) {
+      ctx.fail(403, '无权限访问该应用');
       return;
     }
 
@@ -24,6 +39,11 @@ export default class MetricsController extends Controller {
       return;
     }
 
+    if (!await this.checkAppAccess(appKey)) {
+      ctx.fail(403, '无权限访问该应用');
+      return;
+    }
+
     const result = await ctx.service.metrics.getTrend(appKey, startTime, endTime, granularity);
     ctx.success(result);
   }
@@ -34,6 +54,11 @@ export default class MetricsController extends Controller {
 
     if (!appKey || !startTime || !endTime) {
       ctx.fail(400, 'appKey, startTime and endTime are required');
+      return;
+    }
+
+    if (!await this.checkAppAccess(appKey)) {
+      ctx.fail(403, '无权限访问该应用');
       return;
     }
 
@@ -53,6 +78,11 @@ export default class MetricsController extends Controller {
 
     if (!appKey || !errorMessage || !startTime || !endTime) {
       ctx.fail(400, 'appKey, errorMessage, startTime and endTime are required');
+      return;
+    }
+
+    if (!await this.checkAppAccess(appKey)) {
+      ctx.fail(403, '无权限访问该应用');
       return;
     }
 
@@ -76,6 +106,11 @@ export default class MetricsController extends Controller {
       return;
     }
 
+    if (!await this.checkAppAccess(appKey)) {
+      ctx.fail(403, '无权限访问该应用');
+      return;
+    }
+
     const result = await ctx.service.metrics.getPerformance(appKey, startTime, endTime);
     ctx.success(result);
   }
@@ -86,6 +121,11 @@ export default class MetricsController extends Controller {
 
     if (!appKey || !startTime || !endTime) {
       ctx.fail(400, 'appKey, startTime and endTime are required');
+      return;
+    }
+
+    if (!await this.checkAppAccess(appKey)) {
+      ctx.fail(403, '无权限访问该应用');
       return;
     }
 
@@ -102,6 +142,11 @@ export default class MetricsController extends Controller {
       return;
     }
 
+    if (!await this.checkAppAccess(appKey)) {
+      ctx.fail(403, '无权限访问该应用');
+      return;
+    }
+
     const result = await ctx.service.metrics.getApiMetrics(appKey, startTime, endTime);
     ctx.success(result);
   }
@@ -112,6 +157,11 @@ export default class MetricsController extends Controller {
 
     if (!appKey || !startTime || !endTime) {
       ctx.fail(400, 'appKey, startTime and endTime are required');
+      return;
+    }
+
+    if (!await this.checkAppAccess(appKey)) {
+      ctx.fail(403, '无权限访问该应用');
       return;
     }
 
@@ -130,6 +180,11 @@ export default class MetricsController extends Controller {
 
     if (!appKey || !eventName || !startTime || !endTime) {
       ctx.fail(400, 'appKey, eventName, startTime and endTime are required');
+      return;
+    }
+
+    if (!await this.checkAppAccess(appKey)) {
+      ctx.fail(403, '无权限访问该应用');
       return;
     }
 

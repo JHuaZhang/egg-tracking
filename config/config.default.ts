@@ -34,7 +34,7 @@ export default (appInfo: EggAppInfo) => {
     },
   };
 
-  config.middleware = ['errorHandler', 'requestLogger'];
+  config.middleware = ['errorHandler', 'requestLogger', 'auth'];
 
   config.cors = {
     origin(ctx) {
