@@ -31,4 +31,16 @@ module.exports = (app: Application) => {
   router.get('/alerts', controller.alert.list);
   router.put('/alerts/:id', controller.alert.update);
   router.delete('/alerts/:id', controller.alert.remove);
+
+  /** 用户认证接口 */
+  router.post('/user/setup-admin', controller.user.setupAdmin);
+  router.post('/user/login', controller.user.login);
+  router.get('/user/info', controller.user.info);
+  router.post('/user/change-password', controller.user.changePassword);
+
+  /** 用户管理接口（管理员） */
+  router.post('/user/create', controller.user.createUser);
+  router.get('/user/list', controller.user.listUsers);
+  router.delete('/user/:id', controller.user.deleteUser);
+  router.put('/user/:id/apps', controller.user.updateUserApps);
 };

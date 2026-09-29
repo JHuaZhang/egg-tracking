@@ -59,6 +59,7 @@ class AppBootHook implements IBoot {
 
     if (conn.readyState === ConnectionStates.connected) {
       this.app.logger.info('✅ MongoDB 已成功连接');
+
       conn
         .on('connected', () => this.app.logger.info('🔌 MongoDB 重新连接成功'))
         .on('disconnected', () => this.app.logger.warn('⚠️ MongoDB 连接断开'))
